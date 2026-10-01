@@ -1,2 +1,5 @@
+venv/
 .terraform/
 *.tfstate
+raw_data/
+*.parquet
