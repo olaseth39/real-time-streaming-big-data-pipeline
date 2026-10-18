@@ -13,7 +13,7 @@ Implementation Steps
     Execution: Successfully ran terraform init, terraform plan, and terraform apply to build the infrastructure without manual console intervention.
 
 
-Day 2-4: Docker, Streaming, and Big Data Processing
+Day 2-6: Docker, Streaming, and Big Data Processing
 
 Objective: Containerize the environment, stream real-time data using Kafka, and process it using Apache Spark.
 
@@ -28,3 +28,16 @@ Implementation Steps
 Architectural Pivot
 
 Initially, Spark was configured to read directly from Kafka. However, due to Java/Scala version mismatches with the Kafka connector JAR, the architecture was decoupled. Python now handles the Kafka-to-S3 ingestion, and Spark processes the files from disk, which is a more robust pattern for this environment.
+
+Day 7: Data Warehousing & Transformations (Postgres & dbt)
+
+Objective: Load the Spark-processed big data into a Data Warehouse and transform it into a business-ready Gold layer using dbt.
+
+Tech Stack: PostgreSQL, Python (Pandas/SQLAlchemy), dbt.
+Implementation Steps
+
+    Data Loading: Wrote load_to_warehouse.py using pandas and SQLAlchemy to read the Spark-processed Parquet files and load them into the PostgreSQL Data Warehouse.
+    dbt Setup: Installed dbt-postgres and initialized the project. Configured the profiles.yml to connect to the local Dockerized Postgres container.
+    Medallion Architecture: 
+        Bronze (stg_rides): A staging view that casts data types and filters out invalid records.
+        Gold (fact_rides_summary): An aggregated view using {{ ref() }} to group rides by passenger count, calculating total rides, average, min, and max prices for analytics.

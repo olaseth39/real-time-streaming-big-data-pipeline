@@ -1,18 +1,14 @@
 import json
 import time
 import random
-from confluent_kafka import Producer
+from kafka import KafkaProducer
 
-# Kafka configuration
-conf = {'bootstrap.servers': 'localhost:9092'}
-producer = Producer(conf)
-
-# Optional: Callback to see if delivery succeeded
-def delivery_report(err, msg):
-    if err is not None:
-        print(f"Delivery failed: {err}")
-    else:
-        print(f"Produced event to topic {msg.topic()} [partition {msg.partition()}]")
+# Connect to Kafka
+producer = KafkaProducer(
+    bootstrap_servers='localhost:9092',
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    key_serializer=str.encode
+)
 
 # Simulate 10 ride requests
 ride_id = 1
@@ -27,13 +23,11 @@ for _ in range(10):
         "price": round(random.uniform(15.50, 85.20), 2)
     }
     
-    # Convert to JSON and send to Kafka
-    producer.produce('ride_events', key=str(ride_id), value=json.dumps(ride_data), callback=delivery_report)
+    # Send to Kafka
+    producer.send('ride_events', key=str(ride_id), value=ride_data)
+    print(f"Produced ride {ride_id}")
     ride_id += 1
-    
-    # Sleep 1 second to simulate real-time streaming
     time.sleep(1)
 
-# Wait for all messages to be delivered
 producer.flush()
 print("Finished producing 10 ride events!")
